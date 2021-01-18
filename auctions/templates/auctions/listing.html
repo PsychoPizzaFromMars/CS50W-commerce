@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{ listing.title }}</h2>
+    <p>Created {{ listing.date }} by {{ listing.user }}</p>
+    {% if listing.item_image %}
+    <img id="item_img" height="300" src="{{ listing.item_image }}">
+    {% else %}
+    <img id="item_img" width="250" src="https://static.wikia.nocookie.net/houseki-no-kuni/images/3/3b/Missingimage.png/revision/latest?cb=20190328111547&path-prefix=ru">
+    {% endif %}
+    <hr>
+    <p>Category: <a href=''>{{ listing.category }}</a></p>
+    <hr>
+    <p>{{ listing.desc }}</p>
+    {% if max_bid %}
+    <p>Current bid: ${{ listing.cur_bid }} by {{ listing.user }}</p>
+    {% else %}
+    <p>Starting bid: ${{ listing.start_bid }}</p>
+    {% endif %}
+{% endblock %}
