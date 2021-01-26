@@ -9,5 +9,8 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("create", views.create, name="create"),
     path("categories", views.categories, name="categories"),
+    path("categories/<int:category_id>", views.category_items, name="category_items"),
     path("listings/<int:listing_id>", views.listing_page, name="listing_page"),
+    path("user-watchlist-add", views.user_watchlist_add, name="user-watchlist-add"),
+    path("user-watchlist-rm", views.user_watchlist_rm, name="user-watchlist-rm"),
 ]

@@ -1,15 +1,24 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.shortcuts import render
 from django.urls import reverse
 from django.db.models import Max
 
 from .models import *
+from .forms import WatchlistForm
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    listings = AuctionListing.objects.all()
+    # if listings.cur_bid:
+    #     max_bid = AuctionListing.objects.aggregate(Max("cur_bid"))
+    # else:
+    #     max_bid = None
+    return render(request, "auctions/index.html", {
+        "listings": listings,
+        # "max_bid": max_bid,
+    })
 
 
 def login_view(request):
@@ -63,6 +72,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 def create(request):
     if request.user.is_authenticated:
         user = request.user
@@ -72,7 +82,8 @@ def create(request):
             start_bid = float(request.POST["start_bid"])
             item_img_url = request.POST["item_img_url"]
             category = Item_category.objects.get(pk=request.POST["category"])
-            listing = AuctionListing(title=title, desc=desc, start_bid=start_bid, item_image=item_img_url, category=category, user=user)
+            listing = AuctionListing(title=title, desc=desc, start_bid=start_bid,
+                                     item_image=item_img_url, category=category, user=user)
             listing.save()
             return HttpResponseRedirect(reverse("index"))
         else:
@@ -83,19 +94,52 @@ def create(request):
     else:
         return HttpResponseRedirect(reverse("login"))
 
+
 def categories(request):
     categories = Item_category.objects.all()
     return render(request, "auctions/categories.html", {
         "categories": categories,
     })
 
+
 def listing_page(request, listing_id):
     listing = AuctionListing.objects.get(pk=listing_id)
+    is_watchlisted = User.objects.filter(watchlist=listing).exists()
     if listing.cur_bid:
         max_bid = AuctionListing.objects.aggregate(Max("cur_bid"))
     else:
         max_bid = None
+    category_id = listing.category.id
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "max_bid": max_bid,
+        "category_id": category_id,
+        "is_watchlisted": is_watchlisted,
     })
+
+
+def category_items(request, category_id):
+    listings = AuctionListing.objects.filter(
+        category=Item_category.objects.get(pk=category_id))
+    return render(request, "auctions/category_items.html", {
+        "listings": listings,
+        "category_name": Item_category.objects.get(pk=category_id)
+    })
+
+
+def user_watchlist_add(request):
+    form = WatchlistForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        request.user.watchlist.add(form.cleaned_data['listing'])
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
+    raise Http404()
+
+
+def user_watchlist_rm(request):
+    form = WatchlistForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        request.user.watchlist.remove(form.cleaned_data['listing'])
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
+    raise Http404()
