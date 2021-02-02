@@ -164,3 +164,12 @@ def new_bid(request):
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
     raise Http404()
+
+def watchlist_page(request):
+    if request.user.is_authenticated:
+        user = request.user
+        watchlist = AuctionListing.objects.filter(id__in=user.watchlist.all())
+        return render(request, "auctions/watchlist.html", {
+            "watchlist": watchlist
+        })
+    raise Http404()
