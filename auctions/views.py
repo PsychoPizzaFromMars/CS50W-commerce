@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.db.models import Max
 
 from .models import *
-from .forms import WatchlistForm
+from .forms import WatchlistForm, NewBidForm
 
 
 def index(request):
@@ -104,11 +104,19 @@ def categories(request):
 
 def listing_page(request, listing_id):
     listing = AuctionListing.objects.get(pk=listing_id)
-    is_watchlisted = User.objects.filter(watchlist=listing).exists()
-    if listing.cur_bid:
-        max_bid = AuctionListing.objects.aggregate(Max("cur_bid"))
+    if request.user.is_authenticated:
+        user = request.user
+        is_watchlisted = User.objects.filter(
+            pk=user.id, watchlist=listing).exists()
+    else:
+        is_watchlisted = None
+
+    if Bid.objects.filter(listing=listing).exists():
+        max_bid = Bid.objects.filter(
+            listing=listing).order_by("-value").first()
     else:
         max_bid = None
+    # new_bid(request, user=user)
     category_id = listing.category.id
     return render(request, "auctions/listing.html", {
         "listing": listing,
@@ -140,6 +148,19 @@ def user_watchlist_rm(request):
     form = WatchlistForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         request.user.watchlist.remove(form.cleaned_data['listing'])
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
+    raise Http404()
+
+
+def new_bid(request):
+    if request.user.is_authenticated:
+        user = request.user
+    form = NewBidForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        new_bid = Bid(value=form.cleaned_data['bid_value'],
+                      listing=form.cleaned_data['listing'], user=user)
+        new_bid.save()
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
     raise Http404()
