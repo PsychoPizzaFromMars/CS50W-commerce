@@ -2,6 +2,7 @@
 
 {% block body %}
 <h2>{{ listing.title }}</h2>
+<!-- Add to/delete from watchlist button visible for logged in users only -->
 {% if user.is_authenticated %}
 {% if is_watchlisted %}
 
@@ -24,6 +25,7 @@
 {% endif %}
 {% endif %}
 
+<!-- Item info -->
 
 <p>Created {{ listing.date }} by {{ listing.user }}</p>
 
@@ -52,6 +54,9 @@
 <p>Starting bid: ${{ listing.start_bid }}</p>
 
 {% endif %}
+
+<!-- Bid field visible for logged in users only -->
+
 {% if user.is_authenticated %}
 <form method='post' action="{% url 'new_bid' %}">
     {% csrf_token %}
@@ -61,4 +66,50 @@
     <input class="btn btn-primary" type="submit" value="Bid">
 </form>
 {% endif %}
+<hr>
+
+<!-- Comment form -->
+
+{% if user.is_authenticated %}
+<form method='post' action="{% url 'new_comment' %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <input type="hidden" name="listing" value="{{ listing.id }}">
+    <!-- {{ form.comment_entry }} -->
+    <!-- <input type="text" name="comment_entry" value="{{ comment_entry }}"> -->
+    <!-- {{ form.comment_entry}} -->
+    <textarea class="form-control mb-2 w-75" rows="5" id="comment" name="comment_entry" value="{{ comment_entry }}"></textarea>
+    <input class="btn btn-primary" type="submit" value="Post comment">
+</form>
+{% endif %}
+
+<!-- Comments section -->
+<div class="container"></div>
+{% for comment in comments %}
+
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="media g-mb-30 media-comment">
+                <!-- <img class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Image Description"> -->
+                <div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
+                  <div class="g-mb-15">
+                    <h5 class="h5 g-color-gray-dark-v1 mb-0">{{ comment.commenter }}</h5>
+                    <span class="g-color-gray-dark-v4 g-font-size-12">{{ comment.date}}</span>
+                  </div>
+                  
+                  <p> {{ comment.entry}} </p>
+            
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% empty %}
+
+<p>No comments yet.</p>
+
+{% endfor %}
+</div>
 {% endblock %}

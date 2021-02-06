@@ -6,11 +6,12 @@ from django.urls import reverse
 from django.db.models import Max
 
 from .models import *
-from .forms import WatchlistForm, NewBidForm
+from .forms import *
 
 
 def index(request):
     listings = AuctionListing.objects.all()
+    bids = Bid.objects.order_by('id', '-value')
     # if listings.cur_bid:
     #     max_bid = AuctionListing.objects.aggregate(Max("cur_bid"))
     # else:
@@ -118,11 +119,13 @@ def listing_page(request, listing_id):
         max_bid = None
     # new_bid(request, user=user)
     category_id = listing.category.id
+    comments = Comment.objects.filter(listing_id=listing_id)
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "max_bid": max_bid,
         "category_id": category_id,
         "is_watchlisted": is_watchlisted,
+        "comments": comments,
     })
 
 
@@ -172,4 +175,16 @@ def watchlist_page(request):
         return render(request, "auctions/watchlist.html", {
             "watchlist": watchlist
         })
+    raise Http404()
+
+def new_comment(request):
+    if request.user.is_authenticated:
+        user = request.user
+    form = NewCommentForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        new_comment = Comment(entry=form.cleaned_data['comment_entry'],
+                      listing=form.cleaned_data['listing'], commenter=user)
+        new_comment.save()
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
     raise Http404()

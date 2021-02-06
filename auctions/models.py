@@ -20,7 +20,7 @@ class Bid(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user} bidded ${self.value} at {self.date}"
+        return f"{self.user} bidded ${self.value} to {self.listing} at {self.date}"
 
 
 class Item_category(models.Model):
@@ -43,7 +43,7 @@ class AuctionListing(models.Model):
         Item_category, on_delete=models.CASCADE, related_name="listings")
 
     date = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.title} by {self.user}"
