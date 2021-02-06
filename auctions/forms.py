@@ -10,3 +10,6 @@ class NewBidForm(forms.Form):
 class NewCommentForm(forms.Form):
     comment_entry = forms.CharField(widget=forms.Textarea, max_length=350)
     listing = forms.ModelChoiceField(queryset=AuctionListing.objects.all())
+
+class CloseAuctionForm(forms.Form):
+    listing = forms.ModelChoiceField(queryset=AuctionListing.objects.all())

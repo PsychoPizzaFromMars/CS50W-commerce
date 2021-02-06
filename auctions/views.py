@@ -188,3 +188,13 @@ def new_comment(request):
         next = request.POST.get('next', '/')
         return HttpResponseRedirect(next)
     raise Http404()
+
+def close_auction(request):
+    form = CloseAuctionForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        close_auction = form.cleaned_data['listing']
+        close_auction.is_active = False
+        close_auction.save()
+        next = request.POST.get('next', '/')
+        return HttpResponseRedirect(next)
+    raise Http404()

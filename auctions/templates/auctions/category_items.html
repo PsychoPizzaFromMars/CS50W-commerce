@@ -4,6 +4,7 @@
 <h2>Listings in <i>{{ category_name }}</i></h2>
 {% if listings %}
 {% for listing in listings %}
+{% if listing.is_active %}
 <div class="container-fluid mb-2 border position-relative">
     <div class="row">
         <div class="col-sm-3">
@@ -30,6 +31,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endfor %}
 {% else %}
 <p>Items not found</p>

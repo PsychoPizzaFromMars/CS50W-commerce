@@ -4,6 +4,7 @@
 <h2>Active Listings</h2>
 
 {% for listing in listings %}
+{% if listing.is_active %}
 
 <div class="container-fluid mb-2 border position-relative">
     <div class="row">
@@ -32,6 +33,6 @@
     </div>
 </div>
 
-
+{% endif %}
 {% endfor %}
 {% endblock %}

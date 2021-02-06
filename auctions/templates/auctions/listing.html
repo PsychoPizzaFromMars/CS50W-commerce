@@ -1,5 +1,4 @@
 {% extends "auctions/layout.html" %}
-
 {% block body %}
 <h2>{{ listing.title }}</h2>
 <!-- Add to/delete from watchlist button visible for logged in users only -->
@@ -45,19 +44,46 @@
 <hr>
 <p>{{ listing.desc }}</p>
 
+{% if listing.is_active %}
+
+{% comment %} Display current price of active lot for all users {% endcomment %}
 {% if max_bid %}
 
 <p>Current bid: ${{ max_bid.value }} by {{ max_bid.user }}</p>
 
 {% else %}
-
 <p>Starting bid: ${{ listing.start_bid }}</p>
 
+{% endif %}
+{% comment %} Host of the listing can close an auction {% endcomment %}
+{% if listing.user == user %}
+<form method='post' action="{% url 'close_auction' %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <input type="hidden" name="listing" value="{{ listing.id }}">
+    <button class="btn btn-primary" type='submit'>Close auction</button>
+</form>
+{% endif %}
+{% else %}
+{% comment %} Display message for winner when the lot is closed {% endcomment %}
+{% if max_bid.user == user %}
+
+<div class="p-3 mb-2 bg-success text-white">You won this auction with a ${{ max_bid.value }} bid! Please message the listing's owner for more details. </div>
+
+
+
+
+{% else %}
+{% comment %} Display message for every other user when the lot is closed {% endcomment %}
+<p>{{ max_bid.user }} won this lot.</p>
+
+{% endif %}
 {% endif %}
 
 <!-- Bid field visible for logged in users only -->
 
 {% if user.is_authenticated %}
+{% if listing.is_active %}
 <form method='post' action="{% url 'new_bid' %}">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.path }}">
@@ -65,6 +91,7 @@
     <input type="number" step=".01" name="bid_value" value="{{ bid_value }}">
     <input class="btn btn-primary" type="submit" value="Bid">
 </form>
+{% endif %}
 {% endif %}
 <hr>
 
@@ -78,32 +105,33 @@
     <!-- {{ form.comment_entry }} -->
     <!-- <input type="text" name="comment_entry" value="{{ comment_entry }}"> -->
     <!-- {{ form.comment_entry}} -->
-    <textarea class="form-control mb-2 w-75" rows="5" id="comment" name="comment_entry" value="{{ comment_entry }}"></textarea>
+    <textarea class="form-control mb-2 w-75" rows="5" id="comment" name="comment_entry"
+        value="{{ comment_entry }}"></textarea>
     <input class="btn btn-primary" type="submit" value="Post comment">
 </form>
 {% endif %}
 
 <!-- Comments section -->
-<div class="container"></div>
+
 {% for comment in comments %}
 
 
-    <div class="row">
-        <div class="col-md-9">
-            <div class="media g-mb-30 media-comment">
-                <!-- <img class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Image Description"> -->
-                <div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
-                  <div class="g-mb-15">
+<div class="row">
+    <div class="col-md-9">
+        <div class="media g-mb-30 media-comment">
+            <!-- <img class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15" src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Image Description"> -->
+            <div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
+                <div class="g-mb-15">
                     <h5 class="h5 g-color-gray-dark-v1 mb-0">{{ comment.commenter }}</h5>
-                    <span class="g-color-gray-dark-v4 g-font-size-12">{{ comment.date}}</span>
-                  </div>
-                  
-                  <p> {{ comment.entry}} </p>
-            
+                    <span class="g-color-gray-dark-v4 g-font-size-12">{{ comment.date }}</span>
                 </div>
+
+                <p> {{ comment.entry }} </p>
+
             </div>
         </div>
     </div>
+</div>
 
 
 {% empty %}
@@ -111,5 +139,5 @@
 <p>No comments yet.</p>
 
 {% endfor %}
-</div>
+
 {% endblock %}
