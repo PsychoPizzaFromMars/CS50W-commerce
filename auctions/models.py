@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Max
 from django.db import models
 
 
@@ -44,6 +45,14 @@ class AuctionListing(models.Model):
 
     date = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+
+    @property
+    def current_price(self):
+        cur_bid = Bid.objects.filter(listing_id=self.id).aggregate(max_value=Max('value'))
+        if cur_bid['max_value'] != None:
+            return "{:.2f}".format(float(cur_bid['max_value']))
+        else:
+            return self.start_bid
 
     def __str__(self):
         return f"{self.title} by {self.user}"

@@ -10,15 +10,10 @@ from .forms import *
 
 
 def index(request):
-    listings = AuctionListing.objects.all()
-    bids = Bid.objects.order_by('id', '-value')
-    # if listings.cur_bid:
-    #     max_bid = AuctionListing.objects.aggregate(Max("cur_bid"))
-    # else:
-    #     max_bid = None
+    listings = AuctionListing.objects.filter(is_active=True)
+
     return render(request, "auctions/index.html", {
         "listings": listings,
-        # "max_bid": max_bid,
     })
 
 
@@ -130,7 +125,7 @@ def listing_page(request, listing_id):
 
 
 def category_items(request, category_id):
-    listings = AuctionListing.objects.filter(
+    listings = AuctionListing.objects.filter(is_active=True,
         category=Item_category.objects.get(pk=category_id))
     return render(request, "auctions/category_items.html", {
         "listings": listings,

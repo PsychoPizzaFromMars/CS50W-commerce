@@ -3,8 +3,8 @@
 {% block body %}
 <h2>Active Listings</h2>
 
+{% if listings %}
 {% for listing in listings %}
-{% if listing.is_active %}
 
 <div class="container-fluid mb-2 border position-relative">
     <div class="row">
@@ -20,12 +20,7 @@
         <div class="col align-self-center">
             <h5>{{ listing.title }}</h5>
             <p><b>Price:</b>
-                {% if max_bid %}
-                ${{ max_bid.value }}
-                {% else %}
-                ${{ listing.start_bid}}
-                {% endif %}
-                <!-- ${{ listing.start_bid }} -->
+                ${{ listing.current_price }}
             </p>
             <p>Created {{ listing.date }}</p>
 
@@ -33,6 +28,11 @@
     </div>
 </div>
 
-{% endif %}
+
 {% endfor %}
+
+{% else %}
+<p>No items found</p>
+{% endif %}
+
 {% endblock %}

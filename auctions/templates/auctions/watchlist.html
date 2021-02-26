@@ -3,10 +3,11 @@
 {% block body %}
 <h2>Your watchlist</h2>
 <ul>{% for listing in watchlist %}
-<li><a href="{% url 'listing_page' listing.id %}">{{ listing }}</a></li></ul>
+<li><a href="{% url 'listing_page' listing.id %}">{{ listing }}</a></li>
 
 {% empty %}
 <p>You're currently not following any listing.</p>
 
 {% endfor %}
+</ul>
 {% endblock %}
