@@ -1,5 +1,15 @@
 {% extends "auctions/layout.html" %}
+{% block title %}{{ listing.title }}{% endblock %}
 {% block body %}
+{% if messages %}
+<div class="p-3 mb-2 bg-danger text-white">
+<ul class="messages">
+   {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+  {% endfor %}
+ </ul>
+    {% endif %}
+</div>
 <h2>{{ listing.title }}</h2>
 <!-- Add to/delete from watchlist button visible for logged in users only -->
 {% if user.is_authenticated %}

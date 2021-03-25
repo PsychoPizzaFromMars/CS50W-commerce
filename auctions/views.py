@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http40
 from django.shortcuts import render
 from django.urls import reverse
 from django.db.models import Max
+from django.contrib import messages
 
 from .models import *
 from .forms import *
@@ -157,11 +158,13 @@ def new_bid(request):
     form = NewBidForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         new_bid = Bid(value=form.cleaned_data['bid_value'],
-                      listing=form.cleaned_data['listing'], user=user)
+                listing=form.cleaned_data['listing'], user=user)
         new_bid.save()
-        next = request.POST.get('next', '/')
-        return HttpResponseRedirect(next)
-    raise Http404()
+    else:
+        messages.add_message(request, messages.ERROR, 'Wrong bid value (starting bid <= previous bid < your bid)')
+    next = request.POST.get('next', '/')
+    return HttpResponseRedirect(next)
+
 
 def watchlist_page(request):
     if request.user.is_authenticated:
