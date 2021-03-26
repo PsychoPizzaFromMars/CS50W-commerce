@@ -93,7 +93,7 @@ def create(request):
 
 
 def categories(request):
-    categories = Item_category.objects.all()
+    categories = Item_category.objects.order_by('name')
     return render(request, "auctions/categories.html", {
         "categories": categories,
     })
